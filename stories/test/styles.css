@@ -1,0 +1,21 @@
+.test {
+  border-radius: 4px;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fafafa;
+  height: 100vh;
+}
+
+.test>svg {
+  background: white;
+  border: 1px solid #d3d3d3;
+}
+
+.test path {
+  fill: none;
+  stroke: #ddd;
+  stroke-width: 2px;
+  stroke-linecap: round;
+}

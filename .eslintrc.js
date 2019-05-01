@@ -4,7 +4,7 @@ module.exports = {
       version: 'detect',
     }
   },
-  extends: ['prettier', 'standard'],
+  extends: ['prettier', 'standard', 'react-app'],
   env: {
     browser: true,
     es6: true,
