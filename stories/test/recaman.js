@@ -1,13 +1,12 @@
 import * as d3 from 'd3'
 
 export default function (svg, width, height) {
-  var n = 60
+  let n = 60
+  let curr = 0
+  const seq = [curr]
 
-  var curr = 0
-  var seq = [curr]
-
-  for (var i = 1; i < n; i++) {
-    var next = curr - i
+  for (let i = 1; i < n; i++) {
+    let next = curr - i
 
     if (next < 0 || seq.includes(next)) {
       curr = curr + i
@@ -18,44 +17,35 @@ export default function (svg, width, height) {
     }
   }
 
-  console.log(seq)
+  console.log('seq', seq)
 
-  var data = []
-  var sign = 1
-
-  for (var i = 0; i < n - 1; i++) {
-    var center = (seq[i] + seq[i + 1]) / 2
-    var radius = Math.abs(seq[i] - seq[i + 1]) / 2
-    var dir = Math.sign(seq[i + 1] - seq[i])
-    data.push({ center: center, radius: radius, sign: sign, dir: dir })
+  let sign = 1
+  const data = new Array(n).fill('').map((meh, i) => {
     sign = -sign
-  }
 
-  console.log(data)
+    return {
+      dir: Math.sign(seq[i + 1] - seq[i]),
+      center: (seq[i] + seq[i + 1]) / 2,
+      radius: Math.abs(seq[i] - seq[i + 1]) / 2,
+      sign,
+    }
+  })
+
+  console.log('data', data)
 
   var g = svg.append('g')
 
-  var x = d3
-    .scaleLinear()
+  const x = d3.scaleLinear()
     .range([0, width])
     .domain([0, d3.max(seq)])
 
-  var arc = d3
-    .arc()
-    .innerRadius(function (d) {
-      return x(d.radius)
-    })
-    .outerRadius(function (d) {
-      return x(d.radius)
-    })
-    .endAngle(function (d) {
-      return d.dir * d.sign * (Math.PI / 2) + ((d.sign - 1) * Math.PI) / 2
-    })
-    .startAngle(function (d) {
-      return -d.dir * d.sign * (Math.PI / 2) + ((d.sign - 1) * Math.PI) / 2
-    })
+  const arc = d3.arc()
+    .innerRadius((d) => x(d.radius))
+    .outerRadius((d) => x(d.radius))
+    .endAngle((d) => d.dir * d.sign * (Math.PI / 2) + ((d.sign - 1) * Math.PI) / 2)
+    .startAngle((d) => -d.dir * d.sign * (Math.PI / 2) + ((d.sign - 1) * Math.PI) / 2)
 
-  var DURATION = 300
+  const DURATION = 100
 
   g.selectAll('path')
     .data(data)
@@ -64,19 +54,16 @@ export default function (svg, width, height) {
     .attr('stroke', 'steelblue')
     .attr('stroke-width', '2')
     .attr('d', arc)
-    .attr('transform', function (d) {
-      return 'translate(' + x(d.center) + ',240)'
-    })
+    .attr('transform', (d) => `translate(${x(d.center)}, 240)`)
     .attr('stroke-dasharray', function (d) {
-      return this.getTotalLength() + ', ' + this.getTotalLength()
+      const totalLength = this.getTotalLength()
+      return `${totalLength}, ${totalLength}`
     })
     .attr('stroke-dashoffset', function (d) {
       return this.getTotalLength()
     })
     .transition()
-    .delay(function (d, i) {
-      return i * DURATION
-    })
+    .delay((d, i) => i * DURATION)
     .duration(DURATION * 2)
     .ease(d3.easeLinear)
     .attr('stroke-dashoffset', 0)

@@ -26,7 +26,6 @@ export default function (svg, width, height) {
   var time = 12000
 
   // SET UP SVG
-
   svg
     .datum(points)
     .attr('width', width)
@@ -35,9 +34,7 @@ export default function (svg, width, height) {
   // APPEND COLOR GRADIENTS
 
   // append radial color gradient to new svg <defs> element
-  var radialGradient = svg
-    .append('defs')
-    .append('radialGradient')
+  var radialGradient = svg.append('defs').append('radialGradient')
     .attr('id', 'radial-gradient')
     .attr('cx', '50%')
     .attr('cy', '20%')
@@ -46,40 +43,30 @@ export default function (svg, width, height) {
   // define color scales
   var numColors = 9
 
-  var gradientScale = d3
-    .scaleLinear()
+  var gradientScale = d3.scaleLinear()
     .domain([0, (numColors - 1) / 2, numColors - 1])
     .range(['lightcoral', 'purple', 'darkslateblue'])
 
   // bind specific color stops to radialGradient
-  radialGradient
-    .selectAll('stop')
+  radialGradient.selectAll('stop')
     .data(d3.range(numColors))
     .enter()
     .append('stop')
-    .attr('offset', function (d, i) {
-      return (i / (numColors - 1)) * 100 + '%'
-    })
-    .attr('stop-color', d => {
-      return gradientScale(d)
-    })
+    .attr('offset', (d, i) => (i / (numColors - 1)) * 100 + '%')
+    .attr('stop-color', (d) => gradientScale(d))
 
   // APPEND LINE PATHS
-
   // faint outline of path
-  svg
-    .append('path')
+  svg.append('path')
     .style('stroke-dasharray', origDash)
     .attr('d', line)
 
-  var path = svg
-    .append('path')
+  var path = svg.append('path')
     .style('stroke', 'url(#radial-gradient)')
     .style('stroke-width', '4')
     .attr('d', line)
 
   // PREPARE FOR PATH TRANSITIONS USING STROKE-DASHARRAY & STROKE-DASHOFFSET
-
   var length = path.node().getTotalLength()
 
   // calc sum of each digit of initial dash array
@@ -95,28 +82,22 @@ export default function (svg, width, height) {
   var dashFill = new Array(dashTimes + 1).join(origDash + ' ')
 
   // combine dashFill with total path length for (double) dashed stroke value
-  var dashStr = dashFill + ', ' + length
+  var dashStr = `${dashFill}, ${length}`
 
   // dashed path initially blank
-  path.style('stroke-dasharray', dashStr).style('stroke-dashoffset', -length)
+  path
+    .style('stroke-dasharray', dashStr)
+    .style('stroke-dashoffset', -length)
 
   // APPEND CIRCLES/POINTS
-
   // little guys
-  svg
-    .selectAll('.point')
+  svg.selectAll('.point')
     .data(points)
     .enter()
     .append('circle')
     .attr('r', 4)
-    .style('fill', (d, i) => {
-      return gradientScale(i)
-    })
-    .attr('transform', function (d) {
-      return 'translate(' + d + ')'
-    })
-
-  // FUNCTIONS
+    .style('fill', (d, i) => gradientScale(i))
+    .attr('transform', (d) => `translate(${d})`)
 
   function goPath () {
     path
@@ -135,38 +116,24 @@ export default function (svg, width, height) {
       .on('end', goPath)
   }
 
-  function drawTest () {
-    var i = d3.interpolateString('0,' - length, '0,0')
-    return function (t) {
-      return i(t)
-    }
-  }
   function drawDashed () {
     var i = d3.interpolateString(-length, '0')
-    return function (t) {
-      return i(t)
-    }
+    return (t) => i(t)
   }
   function drawSolid () {
     var i = d3.interpolateString('0', length)
-    return function (t) {
-      return i(t)
-    }
-  }
-  function clearSolid () {
-    var i = d3.interpolateString(length, '0')
-    return function (t) {
-      return i(t)
-    }
-  }
-  function clearDashed () {
-    var i = d3.interpolateString('0', -length)
-    return function (t) {
-      return i(t)
-    }
+    return (t) => i(t)
   }
 
-  // INITIATE ANIMATION
+  function clearSolid () {
+    var i = d3.interpolateString(length, '0')
+    return (t) => i(t)
+  }
+
+  function clearDashed () {
+    var i = d3.interpolateString('0', -length)
+    return (t) => i(t)
+  }
 
   goPath()
 }

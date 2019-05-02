@@ -44,6 +44,7 @@ public/*
 !private
 private/*
 !private/uploads/.keep
+.sonarlint
 
 npm-debug.log*
 yarn-debug.log*
